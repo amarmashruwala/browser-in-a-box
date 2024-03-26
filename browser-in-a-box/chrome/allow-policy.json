@@ -1,0 +1,19 @@
+{
+    "URLAllowlist": [
+        "about:blank",
+        "app.chime.aws",
+        "amazonaws.com", 
+        "dy6bwq8wn5c1w.cloudfront.net", 
+        "webaudiodemos.appspot.com", 
+        "webrtc.github.io", 
+        "www.youtube.com", 
+        "vdo.ninja",
+        "dnb-hackathon.my.connect.aws",
+        "dnb-hackathon.awsapps.com",
+        "mytuner-radio.com",
+        "wxradio.org",
+        "data:*",
+        "localhost",
+        "host.docker.internal"
+    ]
+}

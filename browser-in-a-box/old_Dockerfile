@@ -1,0 +1,50 @@
+FROM ubuntu
+
+ENV DEBIAN_FRONTEND noninteractive
+ARG APT_FLAGS="-q -y --no-install-recommends"
+WORKDIR /chimeautolayout
+# v4l2loopback-dkms v4l2loopback-utils << removed, not working
+RUN apt-get update \
+    && apt-get upgrade -y \
+    && apt-get install -y linux-generic net-tools build-essential flex bison libssl-dev bc libelf-dev libncurses-dev pulseaudio xvfb virtualenv ffmpeg xdotool espeak espeak-ng speech-dispatcher curl wget\
+    && apt-get install -y --no-install-recommends --no-install-suggests \
+    ca-certificates \
+    && update-ca-certificates 
+
+#  # Install tools for building
+RUN toolDeps=" \
+    unzip sudo socat\
+    " \
+    && apt-get install -y --no-install-recommends --no-install-suggests \
+    $toolDeps 
+
+# Install node
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - &&\
+    apt-get install -y nodejs &&\
+    npm install -g yarn
+
+# Set the Chrome repo.
+RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
+    && echo "deb http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list
+
+# Install Chrome.
+RUN apt-get update && apt-get -y install google-chrome-stable
+
+RUN export uid=1000 gid=1000 && \
+    mkdir -p /home/node && \
+    echo "node:x:${uid}:${gid}:Node,,,:/home/node:/bin/bash" >> /etc/passwd && \
+    echo "node:x:${uid}:" >> /etc/group && \
+    echo "node ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/node && \
+    chmod 0440 /etc/sudoers.d/node && \
+    chown ${uid}:${gid} -R /home/node
+COPY ["package.json","yarn.lock", "./"]
+RUN yarn install
+RUN apt-get update && apt-get -y install pamix alsa-utils
+COPY ["app.mjs", "./"]
+COPY ["chrome/block-policy.json", "chrome/allow-policy.json", "/etc/opt/chrome/policies/managed/"]
+COPY ["pulse/default.pa","/etc/pulse/"]
+COPY ["run.sh", "/"]
+COPY ["modules.conf", "/etc/modules-load.d/"]
+RUN chmod +x /run.sh
+USER node
+ENTRYPOINT  ["/run.sh"]

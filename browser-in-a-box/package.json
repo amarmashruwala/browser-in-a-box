@@ -1,0 +1,18 @@
+{
+  "name": "browser-in-a-box",
+  "version": "0.0.0",
+  "main": "app.mjs",
+  "license": "Apache-2.0",
+  "scripts": {
+    "start": "node app.mjs",
+    "docker-run": "docker run -it --env-file=.env -p 21224:21224 kaleidoscope",
+    "docker-build": "docker build -t kaleidoscope ."
+  },
+  "dependencies": {
+    "puppeteer": "^20.3.0",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
+    "puppeteer-stream": "^3.0.4",
+    "remote-browser": "^0.0.15"
+  }
+}
